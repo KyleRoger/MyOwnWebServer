@@ -26,23 +26,26 @@ namespace WebDesign_A04
             
             foreach(string argument in args)
             {
-                if(argument.Contains("-WebRoot="))
+                if(argument.Contains("-webRoot="))
                 {
                     webRoot = argument;
+                    webRoot = webRoot.Replace("-webRoot=", "");
                 }
-                else if(argument.Contains("-WebIP="))
+                else if(argument.Contains("-webIP="))
                 {
                     webIP = argument;
+                    webIP = webIP.Replace("-webIP=", "");
                 }
-                else if(argument.Contains("-WebPort="))
+                else if(argument.Contains("-webPort="))
                 {
                     webPort = argument;
+                    webPort = webPort.Replace("-webPort=", "");
                 }
             }
 
             if(webRoot == null || webIP == null || webPort == null)
             {
-                Console.WriteLine("A mandatory field has not been entered! ''-WebRoot='' or ''-WebIP='' or ''-WebPort=''");
+                Console.WriteLine("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
                 return false;
             }
             //USER WILL BE ENTERING -WebRoot= for the root of the website -WebIP-For the IP of the computer, -WebPort to enter the port
@@ -66,7 +69,7 @@ namespace WebDesign_A04
 
 
 
-            strRequest = "GET" + webRoot + "HTTP / 1.1\r\n" + "HOST: " + webIP + "\r\n" + "\r\n";
+            strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + "localhost" + "\r\n" + "\r\n";
 
             server.Send(Encoding.ASCII.GetBytes(strRequest));   // send off the request
 
