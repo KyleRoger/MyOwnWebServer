@@ -19,7 +19,10 @@ namespace WebDesign_A04
     {
         static void Main(string[] args)
         {
-           
+            WebServer server = new WebServer();
+            bool accepted = true;
+            accepted = server.ServerStart(args);
+            Console.ReadKey();
         }
     }
 }
