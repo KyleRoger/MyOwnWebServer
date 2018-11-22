@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WebDesign_A04
 {
@@ -88,11 +91,31 @@ namespace WebDesign_A04
                 //   -- assuming that the first occurance of the "\r\n\r\n" happens just before the encoded image contents
                 //
                 int isImage = stringData.IndexOf("Content-Type: image/jpeg");
+                int isHTML = stringData.IndexOf("Content-Type: text/html");
+                int isText = stringData.IndexOf("Content-Type: text/plain");
+
                 if (isImage > 0)
                 {
                     // find the \r\n\r\n and cut the string short at that point
                     int imageStart = stringData.IndexOf("\r\n\r\n");
                     Console.WriteLine(stringData.Substring(0, (imageStart - 1)) + "\r\n\r\n[IMAGE DATA Found Here ...]\r\n");
+
+                }
+                else if (isHTML > 0)
+                {
+
+                    WebBrowser webBrowserTest = new WebBrowser();
+
+                    webBrowserTest.DocumentText = "";
+                    HtmlDocument doc = webBrowserTest.Document;
+     
+                    doc.Window.OpenNew(new Uri("http://localhost:" + webPort + webRoot), "displayWindow");
+                
+                    Console.WriteLine(stringData + "\r\n");
+
+                }
+                else if (isText > 0)
+                {
 
                 }
                 else

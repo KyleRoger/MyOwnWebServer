@@ -17,6 +17,7 @@ namespace WebDesign_A04
 {
     class MyOwnWebServer
     {
+        [STAThread]
         static void Main(string[] args)
         {
             WebServer server = new WebServer();
