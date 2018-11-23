@@ -25,6 +25,7 @@ namespace WebDesign_A04
                 Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
+
             byte[] data = new byte[15000];
             string strRequest, stringData;
             string webRoot = null;
@@ -55,6 +56,7 @@ namespace WebDesign_A04
                 Console.WriteLine("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
                 return false;
             }
+
             //USER WILL BE ENTERING -WebRoot= for the root of the website -WebIP-For the IP of the computer, -WebPort to enter the port
             //Also at the beginning entering a file to search.
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(webIP), Convert.ToInt32(webPort));
@@ -106,10 +108,7 @@ namespace WebDesign_A04
                         //"/temp/test.jpg";
 
                     Image x = (Bitmap)((new ImageConverter()).ConvertFrom(data[imageStart]));
-
-
-
-
+                                       
                 }
                 else if (isHTML > 0)
                 {
@@ -136,16 +135,14 @@ namespace WebDesign_A04
                         Arguments = filePath
                     };
 
-                    Process.Start(startInfo);
-                        
+                    Process.Start(startInfo);                        
                 }
                 else
                 {
                     Console.WriteLine(stringData + "\r\n");      // simply add the entire response
                 }
             }
-
-
+            
             Console.WriteLine("Disconnecting from server...\r\n");
             server.Shutdown(SocketShutdown.Both);
             server.Close();
@@ -154,13 +151,14 @@ namespace WebDesign_A04
         }
 
 
+
         /*
          * Name:    localIPAddress
          * Purpose: This method looks at the ip addresses on the client and compares each to the servers IP,
          *          The ip that matches the first octet of the server's ip is choosen as the client's ip.
          * Inputs:  string matchIP: The server's IP address provided by the user through the UI.
          * Outputs: N/A
-         * Returns: string: the ip address of the client to use for the message queues.
+         * Returns: string: the ip address of the client to use.
          * 
          */
         //Credit: https://stackoverflow.com/questions/6803073/get-local-ip-address
