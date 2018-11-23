@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -21,7 +25,7 @@ namespace WebDesign_A04
                 Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
-            byte[] data = new byte[8192];
+            byte[] data = new byte[12545];
             string strRequest, stringData;
             string webRoot = null;
             string webIP = null;
@@ -98,25 +102,45 @@ namespace WebDesign_A04
                 {
                     // find the \r\n\r\n and cut the string short at that point
                     int imageStart = stringData.IndexOf("\r\n\r\n");
-                    Console.WriteLine(stringData.Substring(0, (imageStart - 1)) + "\r\n\r\n[IMAGE DATA Found Here ...]\r\n");
+
+                    //Will need to disect file path and just get end location... Then take that and save it.
+                    int lastSlashIndex = stringData.LastIndexOf("\\", System.StringComparison.Ordinal);
+
+
+                    string filePath = stringData.Substring(lastSlashIndex);
+                        //"/temp/test.jpg";
+                    int textStart = stringData.IndexOf("\r\n\r\n");
+
+
 
                 }
                 else if (isHTML > 0)
                 {
+                    //Change file path to be less genric... But opens internet Explorer.
+                        string filePath = "/temp/test.html";
+                        int textStart = stringData.IndexOf("\r\n\r\n");
+                        System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
 
-                    WebBrowser webBrowserTest = new WebBrowser();
-
-                    webBrowserTest.DocumentText = "";
-                    HtmlDocument doc = webBrowserTest.Document;
-     
-                    doc.Window.OpenNew(new Uri("http://localhost:" + webPort + webRoot), "displayWindow");
-                
-                    Console.WriteLine(stringData + "\r\n");
+                    Process.Start("IExplore.exe", "file:///C:/temp/test.html");
 
                 }
                 else if (isText > 0)
                 {
+                    //MAY WANT TO FIX FILE LOCATION
+                    string filePath = "/temp/test.txt";
+                    int textStart  = stringData.IndexOf("\r\n\r\n");
+                    System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
 
+                    string notepadPath = Environment.SystemDirectory + "\\notepad.exe";
+
+                    var startInfo = new ProcessStartInfo(notepadPath)
+                    {
+                        WindowStyle = ProcessWindowStyle.Maximized,
+                        Arguments = filePath
+                    };
+
+                    Process.Start(startInfo);
+                        
                 }
                 else
                 {
