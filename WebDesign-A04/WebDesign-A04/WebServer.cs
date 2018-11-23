@@ -21,9 +21,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 
 
@@ -33,14 +30,19 @@ namespace WebDesign_A04
     {
         public bool ServerStart(string[] args)
         {
-            if(args.Length != 4)
+            if(args.Length < 3)
             {
                 Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 Logger.Log("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
+            else if (args.Length > 3)
+            {
+                Logger.Log("Too many Commands Were Entered as arguments.\n");
+                return false;
+            }
 
-            byte[] data = new byte[15000];
+            //byte[] data = new byte[15000];
             string strRequest, stringData;
             string webRoot = null;
             string webIP = null;
@@ -68,104 +70,182 @@ namespace WebDesign_A04
             if(webRoot == null || webIP == null || webPort == null)
             {
                 Console.WriteLine("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
+                Logger.Log("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
                 return false;
             }
 
-            //USER WILL BE ENTERING -WebRoot= for the root of the website -WebIP-For the IP of the computer, -WebPort to enter the port
-            //Also at the beginning entering a file to search.
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(webIP), Convert.ToInt32(webPort));
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            ///
+            /// Credit: https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.7.2
 
-            Socket server = new Socket(AddressFamily.InterNetwork,
-                                       SocketType.Stream,
-                                       ProtocolType.Tcp);
+            string responseMessage = "HTTP/1.1 200 OK <html><body>Hi</body></html>";
+            string test = "HTTP/1.1 200 OK\r\nCache-Control: private\r\nContent-Type: text/html\r\nServer: Microsoft-IIS/10.0\r\nSet-Cookie: ASPSESSIONIDCQDSDRQQ=KNPHGODAFMKGKFJCPOIPGHOH; path=/\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 22:56:50 GMT\r\nContent-Length: 148\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n  \r\n  <head>\r\n\t<title>A Single ASP page</title>\r\n\r\n  </head>\r\n  <body>\r\n\t\t<p>\r\n\t\t\tHello There\r\n\t\t</p>\r\n\r\n  </body>\r\n</html>";
+            responseMessage = test;
 
+        TcpListener server = null;
             try
             {
-                server.Connect(ipep);
-            }
-            catch (SocketException ex)
-            {
-                Logger.Log("Unable to connect to server. Exception: " + ex.Message.ToString());
+                // Set the TcpListener on port 13000.
+                Int32 port = 13000;
+                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
 
-                Console.WriteLine("Unable to connect to server.");
-                Console.WriteLine(ex.ToString());
+                // TcpListener server = new TcpListener(port);
+                server = new TcpListener(localAddr, port);
 
-                return false;
-            }
-            catch (Exception e)
-            {
-                //catch general exceptions not already caught.
-                Logger.Log("Exception: " + e.Message.ToString());
-            }
+                // Start listening for client requests.
+                server.Start();
 
-            //Does Connect. Tested.
-            string serverIP = localIPAddress(webIP);
-            strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + serverIP + "\r\n" + "\r\n";
+                // Buffer for reading data
+                Byte[] bytes = new Byte[256];
+                String data = null;
 
-            server.Send(Encoding.ASCII.GetBytes(strRequest));   // send off the request
-
-            System.Threading.Thread.Sleep(1000);
-
-            int recv = 0;
-            while (server.Available > 0)                          // let's read the response and print it out
-            {
-                //How do we continue to enter bytes into the same file if more than 15000?
-                recv = server.Receive(data);
-
-                stringData = Encoding.ASCII.GetString(data, 0, recv);
-
-                int isImage = stringData.IndexOf("Content-Type: image/jpeg");
-                int isHTML = stringData.IndexOf("Content-Type: text/html");
-                int isText = stringData.IndexOf("Content-Type: text/plain");
-
-                if (isImage > 0)
+                // Enter the listening loop.
+                while (true)
                 {
-                    // find the \r\n\r\n and cut the string short at that point
-                    int imageStart = stringData.IndexOf("\r\n\r\n");
+                    Console.Write("Waiting for a connection... ");
 
-                    //Will need to disect file path and just get end location... Then take that and save it.
-                    int lastSlashIndex = stringData.LastIndexOf("\\", System.StringComparison.Ordinal);
-                    
-                    string filePath = "/temp/test.jpg";
-                    //stringData.Substring(lastSlashIndex);
-                    //"/temp/test.jpg";
-                    System.IO.File.WriteAllText(filePath, stringData.Substring((imageStart)));                                   
-                }
-                else if (isHTML > 0)
-                {
-                    //Change file path to be less genric... But opens internet Explorer.
-                        string filePath = "/temp/test.html";
-                        int textStart = stringData.IndexOf("\r\n\r\n");
-                        System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
+                    // Perform a blocking call to accept requests.
+                    // You could also user server.AcceptSocket() here.
+                    TcpClient client = server.AcceptTcpClient();
+                    Console.WriteLine("Connected!");
 
-                    Process.Start("IExplore.exe", "file:///C:/temp/test.html");
-                }
-                else if (isText > 0)
-                {
-                    //MAY WANT TO FIX FILE LOCATION
-                    string filePath = "/temp/test.txt";
-                    int textStart  = stringData.IndexOf("\r\n\r\n");
-                    System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
+                    data = null;
 
-                    string notepadPath = Environment.SystemDirectory + "\\notepad.exe";
+                    // Get a stream object for reading and writing
+                    NetworkStream stream = client.GetStream();
 
-                    var startInfo = new ProcessStartInfo(notepadPath)
+                    int i;
+
+                    // Loop to receive all the data sent by the client.
+                    while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
-                        WindowStyle = ProcessWindowStyle.Maximized,
-                        Arguments = filePath
-                    };
+                        // Translate data bytes to a ASCII string.
+                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        Console.WriteLine("Received: {0}", data);
 
-                    Process.Start(startInfo);                        
-                }
-                else
-                {
-                    Console.WriteLine(stringData + "\r\n");      // simply add the entire response
+                        // Process the data sent by the client.
+                        data = data.ToUpper();
+
+                        //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(responseMessage);
+
+                        // Send back a response.
+                        stream.Write(msg, 0, msg.Length);
+                        Console.WriteLine("Sent: {0}", data);
+
+                    }
+
+                    // Shutdown and end connection
+                    client.Close();
                 }
             }
+            catch (SocketException e)
+            {
+                Console.WriteLine("SocketException: {0}", e);
+            }
+            finally
+            {
+                // Stop listening for new clients.
+                server.Stop();
+            }
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+            ////USER WILL BE ENTERING -WebRoot= for the root of the website -WebIP-For the IP of the computer, -WebPort to enter the port
+            ////Also at the beginning entering a file to search.
+            //IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(webIP), Convert.ToInt32(webPort));
+
+            //Socket server = new Socket(AddressFamily.InterNetwork,
+            //                           SocketType.Stream,
+            //                           ProtocolType.Tcp);
+
+            //try
+            //{
+            //    server.Connect(ipep);
+            //}
+            //catch (SocketException ex)
+            //{
+            //    Logger.Log("Unable to connect to server. Exception: " + ex.Message.ToString());
+
+            //    Console.WriteLine("Unable to connect to server.");
+            //    Console.WriteLine(ex.ToString());
+
+            //    return false;
+            //}
+            //catch (Exception e)
+            //{
+            //    //catch general exceptions not already caught.
+            //    Logger.Log("Exception: " + e.Message.ToString());
+            //}
+
+            ////Does Connect. Tested.
+            //string serverIP = localIPAddress(webIP);
+            //strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + serverIP + "\r\n" + "\r\n";
+
+            //server.Send(Encoding.ASCII.GetBytes(strRequest));   // send off the request
+
+            //System.Threading.Thread.Sleep(1000);
+
+            //int recv = 0;
+            //while (server.Available > 0)                          // let's read the response and print it out
+            //{
+            //    //How do we continue to enter bytes into the same file if more than 15000?
+            //    recv = server.Receive(data);
+
+            //    stringData = Encoding.ASCII.GetString(data, 0, recv);
+
+            //    int isImage = stringData.IndexOf("Content-Type: image/jpeg");
+            //    int isHTML = stringData.IndexOf("Content-Type: text/html");
+            //    int isText = stringData.IndexOf("Content-Type: text/plain");
+
+            //    if (isImage > 0)
+            //    {
+            //        // find the \r\n\r\n and cut the string short at that point
+            //        int imageStart = stringData.IndexOf("\r\n\r\n");
+
+            //        //Will need to disect file path and just get end location... Then take that and save it.
+            //        int lastSlashIndex = stringData.LastIndexOf("\\", System.StringComparison.Ordinal);
+                    
+            //        string filePath = "/temp/test.jpg";
+            //        //stringData.Substring(lastSlashIndex);
+            //        //"/temp/test.jpg";
+            //        System.IO.File.WriteAllText(filePath, stringData.Substring((imageStart)));                                   
+            //    }
+            //    else if (isHTML > 0)
+            //    {
+            //        //Change file path to be less genric... But opens internet Explorer.
+            //            string filePath = "/temp/test.html";
+            //            int textStart = stringData.IndexOf("\r\n\r\n");
+            //            System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
+
+            //        Process.Start("IExplore.exe", "file:///C:/temp/test.html");
+            //    }
+            //    else if (isText > 0)
+            //    {
+            //        //MAY WANT TO FIX FILE LOCATION
+            //        string filePath = "/temp/test.txt";
+            //        int textStart  = stringData.IndexOf("\r\n\r\n");
+            //        System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
+
+            //        string notepadPath = Environment.SystemDirectory + "\\notepad.exe";
+
+            //        var startInfo = new ProcessStartInfo(notepadPath)
+            //        {
+            //            WindowStyle = ProcessWindowStyle.Maximized,
+            //            Arguments = filePath
+            //        };
+
+            //        Process.Start(startInfo);                        
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine(stringData + "\r\n");      // simply add the entire response
+            //    }
+            //}
             
-            Console.WriteLine("Disconnecting from server...\r\n");
-            server.Shutdown(SocketShutdown.Both);
-            server.Close();
+            //Console.WriteLine("Disconnecting from server...\r\n");
+            //server.Shutdown(SocketShutdown.Both);
+            //server.Close();
 
             return true;
         }

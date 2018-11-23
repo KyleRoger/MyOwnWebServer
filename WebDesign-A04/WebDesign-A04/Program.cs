@@ -24,11 +24,15 @@ namespace WebDesign_A04
 
             WebServer server = new WebServer();
             bool accepted = true;
-
-            Logger.Log("Receaved (" + args + ") as arguments.");
+            Logger.Log("Arguments:");
+            foreach (var arg in args)
+            {
+                Logger.Log("\t Receaved (" + arg.ToString() + ") as argument.");
+            }
             
             accepted = server.ServerStart(args);
             Console.ReadKey();
+            Logger.Log("Closing web server");
         }
     }
 }
