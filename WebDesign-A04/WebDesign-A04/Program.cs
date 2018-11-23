@@ -20,8 +20,13 @@ namespace WebDesign_A04
         [STAThread]
         static void Main(string[] args)
         {
+            Logger.Log("Starting web server.");
+
             WebServer server = new WebServer();
             bool accepted = true;
+
+            Logger.Log("Receaved (" + args + ") as arguments.");
+            
             accepted = server.ServerStart(args);
             Console.ReadKey();
         }

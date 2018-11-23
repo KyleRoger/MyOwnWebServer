@@ -1,4 +1,16 @@
-﻿using System;
+﻿/*
+ * 
+ * Author:      Arie Kraayenbrink, Kyle Horsley
+ * Date:        Nov, 2018
+ * Project:     Assignment 6
+ * File:        WebServer.cs
+ * Description: This is the server for assignment 6.
+ * 
+*/
+
+
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -13,16 +25,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
+
 namespace WebDesign_A04
 {
     class WebServer
     {
-
         public bool ServerStart(string[] args)
         {
             if(args.Length != 4)
             {
                 Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
+                Logger.Log("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
 
@@ -71,9 +85,17 @@ namespace WebDesign_A04
             }
             catch (SocketException ex)
             {
+                Logger.Log("Unable to connect to server. Exception: " + ex.Message.ToString());
+
                 Console.WriteLine("Unable to connect to server.");
                 Console.WriteLine(ex.ToString());
+
                 return false;
+            }
+            catch (Exception e)
+            {
+                //catch general exceptions not already caught.
+                Logger.Log("Exception: " + e.Message.ToString());
             }
 
             //Does Connect. Tested.
@@ -103,16 +125,11 @@ namespace WebDesign_A04
 
                     //Will need to disect file path and just get end location... Then take that and save it.
                     int lastSlashIndex = stringData.LastIndexOf("\\", System.StringComparison.Ordinal);
-
-
+                    
                     string filePath = "/temp/test.jpg";
                     //stringData.Substring(lastSlashIndex);
                     //"/temp/test.jpg";
-                    System.IO.File.WriteAllText(filePath, stringData.Substring((imageStart)));
-
-
-
-
+                    System.IO.File.WriteAllText(filePath, stringData.Substring((imageStart)));                                   
                 }
                 else if (isHTML > 0)
                 {
@@ -122,7 +139,6 @@ namespace WebDesign_A04
                         System.IO.File.WriteAllText(filePath, stringData.Substring((textStart)));
 
                     Process.Start("IExplore.exe", "file:///C:/temp/test.html");
-
                 }
                 else if (isText > 0)
                 {
@@ -193,5 +209,4 @@ namespace WebDesign_A04
             return choosenIP;
         }
     }
-
 }
