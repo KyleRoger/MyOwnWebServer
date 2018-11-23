@@ -25,7 +25,7 @@ namespace WebDesign_A04
                 Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
-            byte[] data = new byte[12545];
+            byte[] data = new byte[15000];
             string strRequest, stringData;
             string webRoot = null;
             string webIP = null;
@@ -74,9 +74,9 @@ namespace WebDesign_A04
                 return false;
             }
 
-
-
-            strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + "localhost" + "\r\n" + "\r\n";
+            //REALLY NOT SURE IF THIS WORKS?? HARD TO TEST ON ONE COMPUTER
+            string serverIP = localIPAddress(webIP);
+            strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + serverIP + "\r\n" + "\r\n";
 
             server.Send(Encoding.ASCII.GetBytes(strRequest));   // send off the request
 
@@ -89,11 +89,6 @@ namespace WebDesign_A04
 
                 stringData = Encoding.ASCII.GetString(data, 0, recv);
 
-                // check if this is an image being returned ... the HTTPTool doesn't have the ability to 
-                // support an image in the RESPONSE window ... so don't encode the returned data into ASCII 
-                //   -- instead, output "IMAGE CONTENTS"
-                //   -- assuming that the first occurance of the "\r\n\r\n" happens just before the encoded image contents
-                //
                 int isImage = stringData.IndexOf("Content-Type: image/jpeg");
                 int isHTML = stringData.IndexOf("Content-Type: text/html");
                 int isText = stringData.IndexOf("Content-Type: text/plain");
@@ -109,7 +104,9 @@ namespace WebDesign_A04
 
                     string filePath = stringData.Substring(lastSlashIndex);
                         //"/temp/test.jpg";
-                    int textStart = stringData.IndexOf("\r\n\r\n");
+
+                    Image x = (Bitmap)((new ImageConverter()).ConvertFrom(data[imageStart]));
+
 
 
 
@@ -155,5 +152,44 @@ namespace WebDesign_A04
 
             return true;
         }
+
+
+        /*
+         * Name:    localIPAddress
+         * Purpose: This method looks at the ip addresses on the client and compares each to the servers IP,
+         *          The ip that matches the first octet of the server's ip is choosen as the client's ip.
+         * Inputs:  string matchIP: The server's IP address provided by the user through the UI.
+         * Outputs: N/A
+         * Returns: string: the ip address of the client to use for the message queues.
+         * 
+         */
+        //Credit: https://stackoverflow.com/questions/6803073/get-local-ip-address
+        public string localIPAddress(string matchIP)
+        {
+            IPHostEntry host;
+            string localIP = "";
+            string choosenIP = null;
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            string[] buff = matchIP.Split('.');
+
+            foreach (IPAddress ip in host.AddressList)
+            {
+                localIP = ip.ToString();
+
+                string[] temp = localIP.Split('.');
+
+                if (ip.AddressFamily == AddressFamily.InterNetwork && temp[0] == buff[0])
+                {
+                    choosenIP = ip.ToString();
+                }
+                else
+                {
+                    localIP = null;
+                }
+            }
+
+            return choosenIP;
+        }
     }
+
 }
