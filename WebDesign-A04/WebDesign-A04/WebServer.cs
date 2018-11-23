@@ -76,7 +76,7 @@ namespace WebDesign_A04
                 return false;
             }
 
-            //REALLY NOT SURE IF THIS WORKS?? HARD TO TEST ON ONE COMPUTER
+            //Does Connect. Tested.
             string serverIP = localIPAddress(webIP);
             strRequest = "GET " + webRoot + " HTTP/1.1\r\n" + "HOST: " + serverIP + "\r\n" + "\r\n";
 
@@ -87,6 +87,7 @@ namespace WebDesign_A04
             int recv = 0;
             while (server.Available > 0)                          // let's read the response and print it out
             {
+                //How do we continue to enter bytes into the same file if more than 15000?
                 recv = server.Receive(data);
 
                 stringData = Encoding.ASCII.GetString(data, 0, recv);
@@ -104,11 +105,14 @@ namespace WebDesign_A04
                     int lastSlashIndex = stringData.LastIndexOf("\\", System.StringComparison.Ordinal);
 
 
-                    string filePath = stringData.Substring(lastSlashIndex);
-                        //"/temp/test.jpg";
+                    string filePath = "/temp/test.jpg";
+                    //stringData.Substring(lastSlashIndex);
+                    //"/temp/test.jpg";
+                    System.IO.File.WriteAllText(filePath, stringData.Substring((imageStart)));
 
-                    Image x = (Bitmap)((new ImageConverter()).ConvertFrom(data[imageStart]));
-                                       
+
+
+
                 }
                 else if (isHTML > 0)
                 {
