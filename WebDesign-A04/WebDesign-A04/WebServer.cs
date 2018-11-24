@@ -11,17 +11,12 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+
 
 
 namespace WebDesign_A04
@@ -31,8 +26,7 @@ namespace WebDesign_A04
         public bool ServerStart(string[] args)
         {
             if(args.Length < 3)
-            {
-                Console.WriteLine("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
+            {                
                 Logger.Log("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
@@ -65,11 +59,15 @@ namespace WebDesign_A04
                     webPort = argument;
                     webPort = webPort.Replace("-webPort=", "");
                 }
+                else
+                {
+                    Logger.Log(argument + "is not a valid command line argument.");
+                    return false;
+                }
             }
 
             if(webRoot == null || webIP == null || webPort == null)
             {
-                Console.WriteLine("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
                 Logger.Log("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
                 return false;
             }
@@ -90,9 +88,9 @@ namespace WebDesign_A04
             TcpListener server = null;
             try
             {
-                // Set the TcpListener on port 13000.
-                Int32 port = 13000;
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+                // Set the TcpListener on port.
+                Int32 port = Convert.ToInt32(webPort);
+                IPAddress localAddr = IPAddress.Parse(webIP);
 
                 // TcpListener server = new TcpListener(port);
                 server = new TcpListener(localAddr, port);
@@ -101,7 +99,7 @@ namespace WebDesign_A04
                 server.Start();
 
                 // Buffer for reading data
-                Byte[] bytes = new Byte[256];
+                Byte[] bytes = new Byte[15000];
                 String data = null;
 
                 // Enter the listening loop.
@@ -127,22 +125,52 @@ namespace WebDesign_A04
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("Received: {0}", data);
+
+                        string path = null;
+                        string responseMessage = null;
+                        string badRequest = "<!DOCTYPE html>< html >< head >< TITLE > Bad Request </ TITLE ></ head >\r\n< BODY >< h2 > Bad Request - Invalid URL </ h2 >\r\n< hr >< p > HTTP Error 400.The request URL is invalid.</ p >\r\n</ BODY ></ HTML >";
+                        if (this.parseRequest(data, out path))
+                        {
+                            path = webRoot + path;
+
+                            string buf = null;
+
+                            if (this.readFile(path, out buf))
+                            {
+                                int contentLength = buf.Length;
+                                responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
+                            }
+                            else
+                            {
+                                //404 error since file not found.
+                                //buf = "HTTP/1.1 400 Bad Request\r\nContent - Type: text / html\r\ncharset = us - ascii\r\nServer: MyOwnWebServer Date: " + DateTime.Now.ToString("r") + " Connection: close\r\nContent - Length: ";
+                                buf = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html; charset=us-ascii\r\nServer: Microsoft-HTTPAPI/2.0\r\nDate: " + DateTime.Now.ToString("r") + "\r\nConnection: close\r\nContent-Length: 324\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\"http://www.w3.org/TR/html4/strict.dtd\">\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n<META HTTP-EQUIV=\"Content-Type\" Content=\"text/html; charset=us-ascii\"></HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
+                                //int contentLength = buf.Length;
+                                //responseMessage = buf + contentLength;
+                                responseMessage = buf;
+                            }
+
+                            //string path = webRoot + this.parseRequest(data);
+                            //int contentLength = this.readFile(path).Length;
+                            //string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(path);
+
+                            // Process the data sent by the client.
+                            //data = data.ToUpper();
+
+                            //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                            //byte[] msg = System.Text.Encoding.ASCII.GetBytes(responseMessage);
+
+                            //// Send back a response.
+                            //stream.Write(msg, 0, msg.Length);
+                            //Console.WriteLine("Sent: {0}", data);
+                        }
                         
-                        string root = @"C:\tmp";    //should be argument passed in, not hard coded
-                        string path = root + this.parseRequest(data);
-                        int contentLength = this.readFile(path).Length;
-                        string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: Fri, 23 Nov 2018 23:39:57 GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: SET-Server\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 23:56:29 GMT\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(path);
 
-                        // Process the data sent by the client.
-                        data = data.ToUpper();
-
-                        //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
                         byte[] msg = System.Text.Encoding.ASCII.GetBytes(responseMessage);
 
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
                         Console.WriteLine("Sent: {0}", data);
-
                     }
 
                     // Shutdown and end connection
@@ -272,55 +300,87 @@ namespace WebDesign_A04
          * 
          */
         //Credit: https://stackoverflow.com/questions/6803073/get-local-ip-address
-        private string localIPAddress(string matchIP)
+        //private string localIPAddress(string matchIP)
+        //{
+        //    IPHostEntry host;
+        //    string localIP = "";
+        //    string choosenIP = null;
+        //    host = Dns.GetHostEntry(Dns.GetHostName());
+        //    string[] buff = matchIP.Split('.');
+
+        //    foreach (IPAddress ip in host.AddressList)
+        //    {
+        //        localIP = ip.ToString();
+
+        //        string[] temp = localIP.Split('.');
+
+        //        if (ip.AddressFamily == AddressFamily.InterNetwork && temp[0] == buff[0])
+        //        {
+        //            choosenIP = ip.ToString();
+        //        }
+        //        else
+        //        {
+        //            localIP = null;
+        //        }
+        //    }
+
+        //    return choosenIP;
+        //}
+        
+
+        private bool readFile(string path, out string message)
         {
-            IPHostEntry host;
-            string localIP = "";
-            string choosenIP = null;
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            string[] buff = matchIP.Split('.');
+            bool success = false;
+            message = null;
 
-            foreach (IPAddress ip in host.AddressList)
+            if (File.Exists(path))
             {
-                localIP = ip.ToString();
-
-                string[] temp = localIP.Split('.');
-
-                if (ip.AddressFamily == AddressFamily.InterNetwork && temp[0] == buff[0])
+                try
                 {
-                    choosenIP = ip.ToString();
+                    message = File.ReadAllText(path, Encoding.ASCII);
+                    success = true;
+                    Logger.Log("Read contents of (" + path + ")");
                 }
-                else
+                catch (Exception e)
                 {
-                    localIP = null;
+                    Logger.Log(e.Message.ToString());
+                    success = false;
                 }
             }
+            else
+            {
+                Logger.Log("File (" + path + ") not found");
+            }
 
-            return choosenIP;
+            return success;
         }
 
-        private string readFile(string path)
+        private bool parseRequest(string message, out string path)
         {
-            string message = null;
+            bool success = false;
+            path = null;
+            string pathRex = @"((?<=GET )([A-Za-z0-9/.]*)(?= HTTP))";
+            string methodRex = @"^(GET)";
 
-            message = File.ReadAllText(path, Encoding.ASCII);
+            if (Regex.IsMatch(message, methodRex))
+            {
+                path = Regex.Match(message, pathRex, RegexOptions.IgnoreCase).Value.ToString();
 
-            return message;
-        }
+                if (!path.Equals(null))
+                {
+                    string replacementReg = @"/";
+                    string replacement = @"\";
+                    Regex rgx = new Regex(replacementReg);
+                    path = rgx.Replace(path, replacement);
+                    success = true;
+                }
+            }
+            else
+            {
+                Logger.Log("Error: method other then GET requested.");
+            }
 
-        private string parseRequest(string message)
-        {
-            string path = null;
-            string pathRex = @"((?<=GET )([A-Za-z/.]*)(?= HTTP))";
-            path = Regex.Match(message, pathRex,RegexOptions.IgnoreCase).Value.ToString();
-
-            string replacementReg = @"/";
-            string replacement = @"\";
-            Regex rgx = new Regex(replacementReg);
-            path = rgx.Replace(path, replacement);
-            //Regex.Replace(path, replacementReg, evaluator, RegexOptions.IgnorePatternWhitespace));
-
-            return path;
+            return success;
         }
     }
 }

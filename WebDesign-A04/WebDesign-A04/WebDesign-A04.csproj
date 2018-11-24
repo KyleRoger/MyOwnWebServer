@@ -7,7 +7,7 @@
     <ProjectGuid>{4974CADF-E651-41EA-BD32-BDC930D87B7E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>WebDesign_A04</RootNamespace>
-    <AssemblyName>WebDesign-A04</AssemblyName>
+    <AssemblyName>MyOwnWebServer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
