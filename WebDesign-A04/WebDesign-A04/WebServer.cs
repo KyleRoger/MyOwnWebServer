@@ -130,6 +130,7 @@ namespace WebDesign_A04
                         string badRequest = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 180\r\n\r\n<!DOCTYPE HTML>\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n</HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
                         if (this.parseRequest(data, out path))
                         {
+                            string mimeType = this.GetMimeType(path);
                             path = webRoot + path;
 
                             string buf = null;
