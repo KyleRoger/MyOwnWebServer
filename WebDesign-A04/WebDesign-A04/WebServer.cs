@@ -11,6 +11,7 @@
 
 
 using System;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -139,21 +140,25 @@ namespace WebDesign_A04
 
                             if (this.readFile(path, out buf))
                             {
-                                if (data.Contains(".html"))
+                                if (mimeType.Equals("text/html"))
                                 {
                                     int contentLength = buf.Length;
                                     responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
                                 }
                             
-                                else if (data.Contains(".txt"))
+                                else if (mimeType.Equals("image/gif"))
                                 {
-                                   
+                                    //byte[] imageByteArray;
+
+                                    //imageByteArray = GetBytesFromImage(path);
+
                                 }
-                                else if (data.Contains(".gif"))
+                                else if (mimeType.Equals("image/jpeg"))
                                 {
-                                    
+                                    byte[] imageByteArray;
+                                    imageByteArray = GetBytesFromImage(path);
                                 }
-                                else if (data.Contains(".jpeg"))
+                                else if (mimeType.Equals("text/plain"))
                                 {
                                     
                                 }
@@ -327,7 +332,14 @@ namespace WebDesign_A04
 
         //    return choosenIP;
         //}
-        
+        private byte[] GetBytesFromImage(String imageFile)
+        {
+            MemoryStream ms = new MemoryStream();
+            Image img = Image.FromFile(imageFile);
+            img.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+            return ms.ToArray();
+        }
 
         private bool readFile(string path, out string message)
         {
