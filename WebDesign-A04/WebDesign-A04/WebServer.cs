@@ -11,17 +11,12 @@
 
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+
 
 
 namespace WebDesign_A04
@@ -90,9 +85,9 @@ namespace WebDesign_A04
             TcpListener server = null;
             try
             {
-                // Set the TcpListener on port 13000.
-                Int32 port = 13000;
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+                // Set the TcpListener on port.
+                Int32 port = Convert.ToInt32(webPort);
+                IPAddress localAddr = IPAddress.Parse(webIP);
 
                 // TcpListener server = new TcpListener(port);
                 server = new TcpListener(localAddr, port);
@@ -101,7 +96,7 @@ namespace WebDesign_A04
                 server.Start();
 
                 // Buffer for reading data
-                Byte[] bytes = new Byte[256];
+                Byte[] bytes = new Byte[15000];
                 String data = null;
 
                 // Enter the listening loop.
@@ -127,9 +122,8 @@ namespace WebDesign_A04
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("Received: {0}", data);
-                        
-                        string root = @"C:\tmp";    //should be argument passed in, not hard coded
-                        string path = root + this.parseRequest(data);
+ 
+                        string path = webRoot + this.parseRequest(data);
                         int contentLength = this.readFile(path).Length;
                         string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: Fri, 23 Nov 2018 23:39:57 GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: SET-Server\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 23:56:29 GMT\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(path);
 
@@ -272,32 +266,33 @@ namespace WebDesign_A04
          * 
          */
         //Credit: https://stackoverflow.com/questions/6803073/get-local-ip-address
-        private string localIPAddress(string matchIP)
-        {
-            IPHostEntry host;
-            string localIP = "";
-            string choosenIP = null;
-            host = Dns.GetHostEntry(Dns.GetHostName());
-            string[] buff = matchIP.Split('.');
+        //private string localIPAddress(string matchIP)
+        //{
+        //    IPHostEntry host;
+        //    string localIP = "";
+        //    string choosenIP = null;
+        //    host = Dns.GetHostEntry(Dns.GetHostName());
+        //    string[] buff = matchIP.Split('.');
 
-            foreach (IPAddress ip in host.AddressList)
-            {
-                localIP = ip.ToString();
+        //    foreach (IPAddress ip in host.AddressList)
+        //    {
+        //        localIP = ip.ToString();
 
-                string[] temp = localIP.Split('.');
+        //        string[] temp = localIP.Split('.');
 
-                if (ip.AddressFamily == AddressFamily.InterNetwork && temp[0] == buff[0])
-                {
-                    choosenIP = ip.ToString();
-                }
-                else
-                {
-                    localIP = null;
-                }
-            }
+        //        if (ip.AddressFamily == AddressFamily.InterNetwork && temp[0] == buff[0])
+        //        {
+        //            choosenIP = ip.ToString();
+        //        }
+        //        else
+        //        {
+        //            localIP = null;
+        //        }
+        //    }
 
-            return choosenIP;
-        }
+        //    return choosenIP;
+        //}
+        
 
         private string readFile(string path)
         {
@@ -318,7 +313,6 @@ namespace WebDesign_A04
             string replacement = @"\";
             Regex rgx = new Regex(replacementReg);
             path = rgx.Replace(path, replacement);
-            //Regex.Replace(path, replacementReg, evaluator, RegexOptions.IgnorePatternWhitespace));
 
             return path;
         }

@@ -21,7 +21,7 @@ namespace WebDesign_A04
         static void Main(string[] args)
         {
             Logger.Log("Starting web server.");
-
+            
             WebServer server = new WebServer();
             bool accepted = true;
             Logger.Log("Arguments:");
