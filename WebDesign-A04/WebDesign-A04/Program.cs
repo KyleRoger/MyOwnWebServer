@@ -17,7 +17,7 @@ namespace WebDesign_A04
 {
     class MyOwnWebServer
     {
-        [STAThread]
+     
         static void Main(string[] args)
         {
             Logger.Log("Starting web server.");
