@@ -148,15 +148,18 @@ namespace WebDesign_A04
                             
                                 else if (mimeType.Equals("image/gif"))
                                 {
-                                    //byte[] imageByteArray;
-
-                                    //imageByteArray = GetBytesFromImage(path);
+                                    int contentLength = buf.Length;
+                                    responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: " + mimeType + "\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
 
                                 }
                                 else if (mimeType.Equals("image/jpeg"))
                                 {
-                                    byte[] imageByteArray;
-                                    imageByteArray = GetBytesFromImage(path);
+                                    //byte[] imageByteArray;
+
+                                    //imageByteArray = GetBytesFromImage(path);
+
+                                    int contentLength = buf.Length;
+                                    responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: " + mimeType + "\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
                                 }
                                 else if (mimeType.Equals("text/plain"))
                                 {
