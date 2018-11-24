@@ -21,7 +21,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-
+using System.Text.RegularExpressions;
 
 
 namespace WebDesign_A04
@@ -78,11 +78,16 @@ namespace WebDesign_A04
             ///
             /// Credit: https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.7.2
 
-            string responseMessage = "HTTP/1.1 200 OK <html><body>Hi</body></html>";
-            string test = "HTTP/1.1 200 OK\r\nCache-Control: private\r\nContent-Type: text/html\r\nServer: Microsoft-IIS/10.0\r\nSet-Cookie: ASPSESSIONIDCQDSDRQQ=KNPHGODAFMKGKFJCPOIPGHOH; path=/\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 22:56:50 GMT\r\nContent-Length: 148\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n  \r\n  <head>\r\n\t<title>A Single ASP page</title>\r\n\r\n  </head>\r\n  <body>\r\n\t\t<p>\r\n\t\t\tHello There\r\n\t\t</p>\r\n\r\n  </body>\r\n</html>";
-            responseMessage = test;
+            //string responseMessage = "HTTP/1.1 200 OK\r\nContent-Length: 68\r\n<!DOCTYPE html>\r\n<html>\r\n<head></head>\r\n<body>\r\nHi\r\n</body>\r\n</html>";
+            //string test = "HTTP/1.1 200 OK\r\nContent-Length: 148\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n  \r\n  <head>\r\n\t<title>A test page</title>\r\n </head>\r\n  <body>\r\n<p>\r\nHello There\r\n</p>\r\n</body>\r\n</html>";
+            //responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: Fri, 23 Nov 2018 23:39:57 GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Microsoft-IIS/10.0\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 23:56:29 GMT\r\nContent-Length: 142\r\n\r\n<!DOCTYPE html>\r\n<html>\r\n  \r\n  <head>\r\n\t<title>A Test page</title>\r\n\r\n  </head>\r\n  <body>\r\n\t\t<p>\r\n\t\t\tHello There\r\n\t\t</p>\r\n\r\n  </body>\r\n</html>";
+            //int contentLength = this.readFile(@"C:\tmp\test.html").Length;
+            //string root = @"C:\tmp";
+            //string path = root + this.parseRequest();
+            //responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: Fri, 23 Nov 2018 23:39:57 GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: SET-Server\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 23:56:29 GMT\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(root + @"\test.html");
+            //"GET /test.html HTTP/1.1\r\nHost: 127.0.0.1:13000\r\nUser-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Language: en-US,en;q=0.5\r\nAccept-Enc"
 
-        TcpListener server = null;
+            TcpListener server = null;
             try
             {
                 // Set the TcpListener on port 13000.
@@ -122,6 +127,11 @@ namespace WebDesign_A04
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
                         Console.WriteLine("Received: {0}", data);
+                        
+                        string root = @"C:\tmp";    //should be argument passed in, not hard coded
+                        string path = root + this.parseRequest(data);
+                        int contentLength = this.readFile(path).Length;
+                        string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: Fri, 23 Nov 2018 23:39:57 GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: SET-Server\r\nX-Powered-By: ASP.NET\r\nDate: Fri, 23 Nov 2018 23:56:29 GMT\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(path);
 
                         // Process the data sent by the client.
                         data = data.ToUpper();
@@ -262,7 +272,7 @@ namespace WebDesign_A04
          * 
          */
         //Credit: https://stackoverflow.com/questions/6803073/get-local-ip-address
-        public string localIPAddress(string matchIP)
+        private string localIPAddress(string matchIP)
         {
             IPHostEntry host;
             string localIP = "";
@@ -287,6 +297,30 @@ namespace WebDesign_A04
             }
 
             return choosenIP;
+        }
+
+        private string readFile(string path)
+        {
+            string message = null;
+
+            message = File.ReadAllText(path, Encoding.ASCII);
+
+            return message;
+        }
+
+        private string parseRequest(string message)
+        {
+            string path = null;
+            string pathRex = @"((?<=GET )([A-Za-z/.]*)(?= HTTP))";
+            path = Regex.Match(message, pathRex,RegexOptions.IgnoreCase).Value.ToString();
+
+            string replacementReg = @"/";
+            string replacement = @"\";
+            Regex rgx = new Regex(replacementReg);
+            path = rgx.Replace(path, replacement);
+            //Regex.Replace(path, replacementReg, evaluator, RegexOptions.IgnorePatternWhitespace));
+
+            return path;
         }
     }
 }
