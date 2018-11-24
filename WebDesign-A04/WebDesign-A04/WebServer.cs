@@ -128,7 +128,8 @@ namespace WebDesign_A04
 
                         string path = null;
                         string responseMessage = null;
-                        string badRequest = "<!DOCTYPE html>< html >< head >< TITLE > Bad Request </ TITLE ></ head >\r\n< BODY >< h2 > Bad Request - Invalid URL </ h2 >\r\n< hr >< p > HTTP Error 400.The request URL is invalid.</ p >\r\n</ BODY ></ HTML >";
+                        //string badRequest = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html; charset=us-ascii\r\nServer: Microsoft-HTTPAPI/2.0\r\nDate: " + DateTime.Now.ToString("r") + "\r\nConnection: close\r\nContent-Length: 324\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\"http://www.w3.org/TR/html4/strict.dtd\">\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n<META HTTP-EQUIV=\"Content-Type\" Content=\"text/html; charset=us-ascii\"></HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
+                        string badRequest = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 180\r\n\r\n<!DOCTYPE HTML>\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n</HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
                         if (this.parseRequest(data, out path))
                         {
                             path = webRoot + path;
@@ -142,27 +143,9 @@ namespace WebDesign_A04
                             }
                             else
                             {
-                                //404 error since file not found.
-                                //buf = "HTTP/1.1 400 Bad Request\r\nContent - Type: text / html\r\ncharset = us - ascii\r\nServer: MyOwnWebServer Date: " + DateTime.Now.ToString("r") + " Connection: close\r\nContent - Length: ";
-                                buf = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html; charset=us-ascii\r\nServer: Microsoft-HTTPAPI/2.0\r\nDate: " + DateTime.Now.ToString("r") + "\r\nConnection: close\r\nContent-Length: 324\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\"http://www.w3.org/TR/html4/strict.dtd\">\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n<META HTTP-EQUIV=\"Content-Type\" Content=\"text/html; charset=us-ascii\"></HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
-                                //int contentLength = buf.Length;
-                                //responseMessage = buf + contentLength;
-                                responseMessage = buf;
+                                //400 error since file not found.
+                                responseMessage = badRequest;
                             }
-
-                            //string path = webRoot + this.parseRequest(data);
-                            //int contentLength = this.readFile(path).Length;
-                            //string responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + this.readFile(path);
-
-                            // Process the data sent by the client.
-                            //data = data.ToUpper();
-
-                            //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-                            //byte[] msg = System.Text.Encoding.ASCII.GetBytes(responseMessage);
-
-                            //// Send back a response.
-                            //stream.Write(msg, 0, msg.Length);
-                            //Console.WriteLine("Sent: {0}", data);
                         }
                         
 
