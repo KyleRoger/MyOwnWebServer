@@ -39,7 +39,7 @@ namespace WebDesign_A04
 
         public static void Log(string message)
         {
-            string path = @"c:\tmp\webServer.log";
+            string path = @"c:\temp\webServer.log";
 
             using (StreamWriter streamWriter = new StreamWriter(path, append: true))
             {

@@ -17,8 +17,6 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 
-
-
 namespace WebDesign_A04
 {
     class WebServer
@@ -129,17 +127,37 @@ namespace WebDesign_A04
                         string path = null;
                         string responseMessage = null;
                         string badRequest = "<!DOCTYPE html>< html >< head >< TITLE > Bad Request </ TITLE ></ head >\r\n< BODY >< h2 > Bad Request - Invalid URL </ h2 >\r\n< hr >< p > HTTP Error 400.The request URL is invalid.</ p >\r\n</ BODY ></ HTML >";
+
                         if (this.parseRequest(data, out path))
                         {
                             path = webRoot + path;
 
                             string buf = null;
+                        
+                            //string mimeType = GetMimeType(data);
 
                             if (this.readFile(path, out buf))
                             {
-                                int contentLength = buf.Length;
-                                responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
+                                if (data.Contains(".html"))
+                                {
+                                    int contentLength = buf.Length;
+                                    responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
+                                }
+                            
+                                else if (data.Contains(".txt"))
+                                {
+                                   
+                                }
+                                else if (data.Contains(".gif"))
+                                {
+                                    
+                                }
+                                else if (data.Contains(".jpeg"))
+                                {
+                                    
+                                }
                             }
+
                             else
                             {
                                 //404 error since file not found.
@@ -354,6 +372,19 @@ namespace WebDesign_A04
 
             return success;
         }
+
+        //Credit: https://stackoverflow.com/questions/1029740/get-mime-type-from-filename-extension
+        private string GetMimeType(string fileName)
+        {
+            string mimeType = "application/unknown";
+            string ext = System.IO.Path.GetExtension(fileName).ToLower();
+            Microsoft.Win32.RegistryKey regKey = Microsoft.Win32.Registry.ClassesRoot.OpenSubKey(ext);
+            if (regKey != null && regKey.GetValue("Content Type") != null)
+                mimeType = regKey.GetValue("Content Type").ToString();
+            return mimeType;
+        }
+
+        //In here, look at the requested page... Check the page name for the extension. Check which extension .
 
         private bool parseRequest(string message, out string path)
         {
