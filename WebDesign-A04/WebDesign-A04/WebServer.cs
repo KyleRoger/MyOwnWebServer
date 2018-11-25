@@ -98,7 +98,7 @@ namespace WebDesign_A04
                 server.Start();
 
                 // Buffer for reading data
-                Byte[] bytes = new Byte[15000];
+                Byte[] bytes = new Byte[150000];
                 String data = null;
 
                 // Enter the listening loop.
@@ -129,6 +129,7 @@ namespace WebDesign_A04
                         string responseMessage = null;
                         //string badRequest = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html; charset=us-ascii\r\nServer: Microsoft-HTTPAPI/2.0\r\nDate: " + DateTime.Now.ToString("r") + "\r\nConnection: close\r\nContent-Length: 324\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\"\"http://www.w3.org/TR/html4/strict.dtd\">\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n<META HTTP-EQUIV=\"Content-Type\" Content=\"text/html; charset=us-ascii\"></HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
                         string badRequest = "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 180\r\n\r\n<!DOCTYPE HTML>\r\n<HTML><HEAD><TITLE>Bad Request</TITLE>\r\n</HEAD>\r\n<BODY><h2>Bad Request - Invalid URL</h2>\r\n<hr><p>HTTP Error 400. The request URL is invalid.</p>\r\n</BODY></HTML>\r\n";
+                        string notImplemented;  //for 501 errors like a post request
                         if (this.parseRequest(data, out path))
                         {
                             string mimeType = this.GetMimeType(path);
@@ -157,9 +158,17 @@ namespace WebDesign_A04
                                     //byte[] imageByteArray;
 
                                     //imageByteArray = GetBytesFromImage(path);
+                                    //Image ii = Image.FromFile(path);
+                                    Byte[] bt = new Byte[150000];
+                                    bt = File.ReadAllBytes(path);
 
-                                    int contentLength = buf.Length;
-                                    responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: " + mimeType + "\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n" + buf;
+                                    int contentLength = bt.Length;
+                                    responseMessage = "HTTP/1.1 200 OK\r\nContent-Type: " + mimeType + "\r\nLast-Modified: " + DateTime.Now.ToString("r") + " GMT\r\nAccept-Ranges: bytes\r\nETag: \"a25cf8d78583d41:0\"\r\nServer: Simple-Server\r\nX-Powered-By: C#\r\nDate: " + DateTime.Now.ToString("r") + "\r\nContent-Length:" + contentLength + "\r\n\r\n";
+                                    Byte[] temp = new Byte[1500];
+                                    temp = System.Text.Encoding.ASCII.GetBytes(responseMessage);                                    
+                                    stream.Write(temp, 0, temp.Length);
+                                    stream.Write(bt, 0, bt.Length);
+
                                 }
                                 else if (mimeType.Equals("text/plain"))
                                 {
@@ -354,7 +363,11 @@ namespace WebDesign_A04
                 try
                 {
                     message = File.ReadAllText(path, Encoding.ASCII);
+                    string mes = File.ReadAllText(path, Encoding.Default);
+                    string mess = File.ReadAllText(path, Encoding.Unicode);
                     success = true;
+                    Image i = Image.FromFile(path);
+
                     Logger.Log("Read contents of (" + path + ")");
                 }
                 catch (Exception e)
@@ -411,5 +424,65 @@ namespace WebDesign_A04
 
             return success;
         }
+
+        ////Credit:https://www.codeproject.com/Articles/452052/Build-Your-Own-Web-Server
+        //private void notImplemented(Socket clientSocket)
+        //{
+
+        //    sendResponse(clientSocket, "<html><head><meta 
+        
+        //        http - equiv =\"Content-Type\" content=\"text/html; 
+        
+        //        charset = utf - 8\">
+        //        </ head >< body >< h2 > Atasoy Simple Web
+        
+        //        Server </ h2 >< div > 501 - Method Not
+        
+        //        Implemented </ div ></ body ></ html > ", 
+        
+        //        "501 Not Implemented", "text/html");
+        //}
+
+        ////Credit:https://www.codeproject.com/Articles/452052/Build-Your-Own-Web-Server
+        //private void notFound(Socket clientSocket)
+        //{
+
+        //    sendResponse(clientSocket, "<html><head><meta http - equiv =\"Content-Type\" content=\"text/html; charset = utf - 8\"></head><body><h2>Atasoy Simple Web Server </ h2 >< div > 404 - Not Found </ div ></ body ></ html > ", "404 Not Found", "text/html");
+        //}
+
+        ////Credit:https://www.codeproject.com/Articles/452052/Build-Your-Own-Web-Server
+        //private void sendOkResponse(Socket clientSocket, byte[] bContent, string contentType)
+        //{
+        //    sendResponse(clientSocket, bContent, "200 OK", contentType);
+        //}
+
+        ////Credit:https://www.codeproject.com/Articles/452052/Build-Your-Own-Web-Server
+        //// For strings
+        //private void sendResponse(Socket clientSocket, string strContent, string responseCode,
+        //                          string contentType)
+        //{
+        //    byte[] bContent = charEncoder.GetBytes(strContent);
+        //    sendResponse(clientSocket, bContent, responseCode, contentType);
+        //}
+
+        ////Credit:https://www.codeproject.com/Articles/452052/Build-Your-Own-Web-Server
+        //// For byte arrays
+        //private void sendResponse(Socket clientSocket, byte[] bContent, string responseCode,
+        //                          string contentType)
+        //{
+        //    try
+        //    {
+        //        byte[] bHeader = charEncoder.GetBytes(
+        //                            "HTTP/1.1 " + responseCode + "\r\n"
+        //                          + "Server: Atasoy Simple Web Server\r\n"
+        //                          + "Content-Length: " + bContent.Length.ToString() + "\r\n"
+        //                          + "Connection: close\r\n"
+        //                          + "Content-Type: " + contentType + "\r\n\r\n");
+        //        clientSocket.Send(bHeader);
+        //        clientSocket.Send(bContent);
+        //        clientSocket.Close();
+        //    }
+        //    catch { }
+        //}
     }
 }
