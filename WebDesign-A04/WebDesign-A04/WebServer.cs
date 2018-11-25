@@ -388,7 +388,7 @@ namespace WebDesign_A04
         {
             bool success = false;
             path = null;
-            string pathRex = @"((?<=GET )([A-Za-z0-9/.]*)(?= HTTP))";
+            string pathRex = @"((?<=GET )([\w./-0-9]+)(?= HTTP))";   //((?<=GET )([A-Za-z0-9/.-]*)(?= HTTP))";
             string methodRex = @"^(GET)";
 
             if (Regex.IsMatch(message, methodRex))
