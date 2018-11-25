@@ -1,10 +1,12 @@
 ﻿/*
  * 
  * Author:      Arie Kraayenbrink, Kyle Horsley
- * Date:        Nov, 2018
- * Project:     Assignment 6
+ * Date:        Nov 25, 2018
+ * Project:     Assignment 6 -Web Design and Development
  * File:        WebServer.cs
- * Description: This is the server for assignment 6.
+ * Description: In this project we developed a server that allows a user to connect and access
+ *              certain files from the server computer and display them to a browser from a seperate
+ *              computer. It uses TCP/IP to communicate and can send images, gifs, text files or webpages.
  * 
 */
 
@@ -24,8 +26,10 @@ namespace WebDesign_A04
 {
 
     /*
-    * Name:    
-    * Purpose:
+    * Name:    WebServer
+    * Purpose: The Purpose of the webServer class is to listen on a socket for incoming data requests
+    *           from a browser. When found the server will find the required information and send it back
+    *           to the client, allowing them to display the information in their browser.
     */
     class WebServer
     {
@@ -52,20 +56,23 @@ namespace WebDesign_A04
 
 
         /*
-        * Name:    
-        * Purpose: 
-        * Inputs:  
-        * Outputs: 
-        * Returns:
+        * Name:    ServerStart
+        * Purpose: The pupose of this method is to initiate the server, listen for messages and parse data inputted 
+        *           from the command line
+        * Inputs:  args- The command line arguments entered when initiating the server.
+        * Outputs: Outputs different error depending on the user inputted values. Otherwise outputs nothing.
+        * Returns: a boolean value, false if an error occured and the program should end, otherwise true.
         * Credit: https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.tcplistener?view=netframework-4.7.2
         */
         public bool ServerStart(string[] args)
         {
+            //If not all the arguments were entered.
             if(args.Length < 3)
             {                
                 Logger.Log("Not Enough Commands Were Entered To Retrieve The Wanted Information.\n");
                 return false;
             }
+            //If too many command line arguments were entered.
             else if (args.Length > 3)
             {
                 Logger.Log("Too many Commands Were Entered as arguments.\n");
@@ -76,6 +83,8 @@ namespace WebDesign_A04
             string webIP = null;
             string webPort = null;
             
+            //Set the value's of each of the command line arguments to their corresponding values
+            //eliminating the precursor messages.
             foreach(string argument in args)
             {
                 if(argument.Contains("-webRoot="))
@@ -100,6 +109,7 @@ namespace WebDesign_A04
                 }
             }
 
+            //All 3 necessary command line arguments must be entered or the program will exit.
             if(webRoot == null || webIP == null || webPort == null)
             {
                 Logger.Log("A mandatory field has not been entered! ''-webRoot='' or ''-webIP='' or ''-webPort=''");
@@ -246,7 +256,7 @@ namespace WebDesign_A04
 
 
         /*
-        * Name:    
+        * Name:    SendMessage
         * Purpose: This method sends out a string message to a connected client through TCP sockets.
         * Inputs:  string message: The message (as a string) to be sent out.
         *          NetworkStream stream: The client's socket stream to send the message to.
@@ -296,11 +306,11 @@ namespace WebDesign_A04
 
 
         /*
-        * Name:    
-        * Purpose: 
-        * Inputs:  
-        * Outputs: 
-        * Returns: 
+        * Name:    GetBytesFromImage
+        * Purpose: The purpose of this method is to recieve the bytes from the given image file.
+        * Inputs:  imageFile - The file of the image to get the bytes from.
+        * Outputs: Nothing
+        * Returns: A byte array corresponding to the image.
         */
         private byte[] GetBytesFromImage(String imageFile)
         {
@@ -387,11 +397,15 @@ namespace WebDesign_A04
 
 
         /*
-        * Name:    
-        * Purpose: 
-        * Inputs:  
-        * Outputs: 
-        * Returns: 
+        * Name:    GetMimeType
+        * Purpose: The purpose of this method is to get the Mimetype of the file recieved from the socket.
+        *           It goes through all files to get all potential mimetype possibilities, and matches the 
+        *           incoming file to one of the mimetypes found on the system otherwise the return value is 
+        *           application/unknown.
+        * Inputs:  fileName - The name of the file to get the mimeType of. Should be one of the following:
+        *           text/html, image/gif, text/html, text/plain.
+        * Outputs: This method outputs nothing to the screen.
+        * Returns: Returns a string value that contains one of the mimeTypes named above.
         * Credit: https://stackoverflow.com/questions/1029740/get-mime-type-from-filename-extension
         */
         private string GetMimeType(string fileName)
@@ -403,9 +417,6 @@ namespace WebDesign_A04
                 mimeType = regKey.GetValue("Content Type").ToString();
             return mimeType;
         }
-
-        //In here, look at the requested page... Check the page name for the extension. Check which extension .
-
 
 
         /*
