@@ -26,17 +26,17 @@ namespace WebDesign_A04
         static void Main(string[] args)
         {
             Logger.Log("Starting web server.");
-            
+
             WebServer server = new WebServer();
-            bool accepted = true;
+            
             Logger.Log("Arguments:");
             foreach (var arg in args)
             {
                 Logger.Log("\t Receaved (" + arg.ToString() + ") as argument.");
             }
             
-            accepted = server.ServerStart(args);
-            //Console.ReadKey();
+            server.ServerStart(args);
+
             Logger.Log("Closing web server");
         }
     }
