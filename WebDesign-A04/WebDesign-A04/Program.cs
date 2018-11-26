@@ -1,10 +1,10 @@
 /*
  * 
- * Author:      Kyle Horsley      
- * Date:        November 19, 2018     
+ * Author:      Kyle Horsley, Arie Kraayenbrink      
+ * Date:        November 25, 2018     
  * Project:     WebDesign-A04
  * File:        Program.cs
- * Description: Will work as a server and get information, parse it and display an html file.
+ * Description: Will work as a server and get information and send it back out to a client.
  * 
 */
 
@@ -25,17 +25,20 @@ namespace WebDesign_A04
      
         static void Main(string[] args)
         {
+            //Initialize the log that the server is starting
             Logger.Log("Starting web server.");
 
+            //Create a new Web Server
             WebServer server = new WebServer();
             
+            //Log all command line arguments.
             Logger.Log("Arguments:");
             foreach (var arg in args)
             {
                 Logger.Log("\t Received (" + arg.ToString() + ") as argument.");
             }
-            
-            
+           
+            //Start the server
             server.ServerStart(args);
 
             Logger.Log("Closing web server");

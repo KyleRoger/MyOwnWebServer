@@ -1,7 +1,7 @@
 ﻿/*
  * 
- * Author:      Arie Kraayenbrink
- * Date:        Nov, 2018
+ * Author:      Arie Kraayenbrink, Kyle Horsley
+ * Date:        Nov 25, 2018
  * Project:     WebDesign-A04
  * File:        Logger.cs
  * Description: This is the logger class for assignment 6.
@@ -19,31 +19,34 @@ using System.Threading;
 
 namespace WebDesign_A04
 {
+    /*
+    * Name:    Logger
+    * Purpose: TO log All Relevant information about a webserver to a file for documentation.
+    */
     class Logger
     {
-        public static void ApplicationLog(string message)
-        {
-            EventLog serverEventLog = new EventLog();
-            if (!EventLog.SourceExists("ServerEventSource"))
-            {
-                EventLog.CreateEventSource("ServerEventSource", "ServerEventLog");
-                Thread.Sleep(1000); //Compensate for latency and allow log to be created.
-            }
-
-            serverEventLog.Source = "ServerEventSource";
-            serverEventLog.Log = "ServerEventLog";
-            serverEventLog.WriteEntry(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + message);
-        }
-
-
-
+        /*
+        * Name:    Log
+        * Purpose: This function logs all application events, both successful and unsuccessful.
+        *           All of the events are timestamped for help with records
+        * Inputs:  message - the information that will be sent to the logger.
+        * Outputs: N/A
+        * Returns: N/A
+        */
         public static void Log(string message)
         {
-            //Needs To Change.
-            string path = @".\webServer.log";
+            //The name of the folder where the logger will be stored.
+            string folderName = @"C:\WebServerLog";
 
+            string path = folderName + @"\webServer.log";
+
+            if (!Directory.Exists(folderName))  //Create a directory if it doesn't exists.
+            {
+                Directory.CreateDirectory(folderName);
+            }
             using (StreamWriter streamWriter = new StreamWriter(path, append: true))
             {
+                //Time-Stamp and write to logger.
                 streamWriter.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + message);
                 streamWriter.Close();
             }
