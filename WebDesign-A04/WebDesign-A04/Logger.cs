@@ -39,7 +39,8 @@ namespace WebDesign_A04
 
         public static void Log(string message)
         {
-            string path = @"c:\temp\webServer.log";
+            //Needs To Change.
+            string path = @".\webServer.log";
 
             using (StreamWriter streamWriter = new StreamWriter(path, append: true))
             {

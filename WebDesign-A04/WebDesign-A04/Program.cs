@@ -32,8 +32,9 @@ namespace WebDesign_A04
             Logger.Log("Arguments:");
             foreach (var arg in args)
             {
-                Logger.Log("\t Receaved (" + arg.ToString() + ") as argument.");
+                Logger.Log("\t Received (" + arg.ToString() + ") as argument.");
             }
+            
             
             server.ServerStart(args);
 

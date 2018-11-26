@@ -150,6 +150,7 @@ namespace WebDesign_A04
                     {
                         // Translate data bytes to a ASCII string.
                         requestString = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        Logger.Log("Message Recieved:\r\n" + requestString);
 
                         string path = null;
                             
@@ -302,26 +303,6 @@ namespace WebDesign_A04
                 Logger.Log(e.Message.ToString());
             }
         }
-
-
-
-        /*
-        * Name:    GetBytesFromImage
-        * Purpose: The purpose of this method is to recieve the bytes from the given image file.
-        * Inputs:  imageFile - The file of the image to get the bytes from.
-        * Outputs: Nothing
-        * Returns: A byte array corresponding to the image.
-        */
-        private byte[] GetBytesFromImage(String imageFile)
-        {
-            MemoryStream ms = new MemoryStream();
-            Image img = Image.FromFile(imageFile);
-            img.Save(ms, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-            return ms.ToArray();
-        }
-
-
 
         /*
         * Name:    readFile
